@@ -1,6 +1,6 @@
 # Modernized C
 
-A mostly conceptual and modernized view for the C programming language + an
+A mostly conceptual and modernized view for the C Programming  Language  and  an
 experimental MC to C transpiler.
 
 ## Data
@@ -40,7 +40,10 @@ Both variables and constants  can  infer  their  type  when  assigned  a  value.
 read-and-write one is passed.
 
 ```text
-var my_variable = 5;
+var var1 = 5;
+var var2 i32 = 5;
+var var3 i32;
+const constant = 10;
 ```
 
 ## Pointers
@@ -69,13 +72,14 @@ const int *
 
 ## Arrays
 
-Arrays in C are quite weird since they correspond to  `*&T`  in  the  operations
-they allow but are not pointers since they contain the data directly instead  of
-containing the address of the first element. They are always fixed size.
+You will not be able to read the array itself but only access  its  values.  All
+arrays have constant size and VLAs are not supported.
 
 ```text
 [i32:10]  // an array of size 10 of readonly i32
 [&i32:30] // an array of size 30 of read-and-write i32
+[[f64:5]:4] // an array of size 4 of arrays of size 5 of readonly f64
+*[i32:6] // a pointer to an array of size 6 of readonly i32
 ```
 
 The types above correspond to:
@@ -83,6 +87,8 @@ The types above correspond to:
 ```text
 const int x[10]
 int x[10]
+double x[5][4]
+const int *x;
 ```
 
 ## Functions
@@ -96,4 +102,27 @@ fn pure() i32 {...}
 
 // function that can access global state
 global fn impure() i32 {...}
+```
+
+## Function arguments
+
+Functions will accept arguments of all types and this is where write-only  types
+become useful. A function that takes an argument of a write-only type can use it
+as an additional return value. Note  that  both  read-and-write  and  write-only
+arguments are passed as pointers.
+
+```text
+fn change(num &i32, result ^i32) {
+    num += 10;
+    result = num;
+}
+```
+
+The function above becomes:
+
+```text
+static void change(int *num, int *result) {
+    *num += 10;
+    *result = *num; 
+}
 ```
